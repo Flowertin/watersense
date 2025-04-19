@@ -1,7 +1,7 @@
 streamlit
 numpy
-pandas as pd
-matplotlib.pyplot
+pandas
+pyplot
 time
 json
 sentence_transformers
