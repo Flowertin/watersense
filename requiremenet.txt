@@ -1,0 +1,11 @@
+streamlit
+numpy
+pandas as pd
+matplotlib.pyplot
+time
+json
+sentence_transformers
+sklearn.metrics.pairwise
+fuzzywuzzy
+datetime
+streamlit_chat
