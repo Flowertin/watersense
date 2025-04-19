@@ -9,3 +9,4 @@ sklearn.metrics.pairwise
 fuzzywuzzy
 datetime
 streamlit_chat
+matplotlib
