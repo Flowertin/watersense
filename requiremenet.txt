@@ -1,12 +1,11 @@
 streamlit
 numpy
 pandas
-pyplot
+matplotlib
 time
 json
-sentence_transformers
-sklearn.metrics.pairwise
+sentence-transformers
+scikit-learn
 fuzzywuzzy
-datetime
-streamlit_chat
-matplotlib
+python-Levenshtein
+streamlit-chat
