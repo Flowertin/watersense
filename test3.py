@@ -4,80 +4,25 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 import json
+import random
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from fuzzywuzzy import process
 from datetime import datetime
 from streamlit_chat import message
+import base64
 
 # ---- Personnalisation CSS ----
-st.markdown(
-    """
-    <style>
-        /* Modifier le fond de la page */
-        [data-testid="stAppViewContainer"] {
-            background-color: white !important;
-        }
-        /* Modifier la barre latérale */
-        [data-testid="stSidebar"] {
-            background-color: bleu !important;
-        }
-        /* Modifier le texte */
-        h1, h2, h3 {
-            color: #004d99 !important;
-        }
-        body, p, span {
-            color: black !important;
-            font-size: 20px !important;
+def get_base64_image(image_path):
+    """Convert image to base64."""
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
 
-        }
+background_image_base64 = get_base64_image("aaa.jpg")
+header_image_base64 = get_base64_image("WaterSense.png")
 
-        /* تغيير لون النص */
-        div[role="radiogroup"] > label {
-            color: black !important;
-        }
-        
-        /* Modifier les boutons */
-        .stButton>button {
-            background-color: #004d99 !important;
-            color: black !important;
-            font-size: 16px !important;
-            border-radius: 10px !important;
-            border: none !important;
-            padding: 8px !important;
-        }
-        .stButton>button:hover {
-            background-color: #004d99 !important;
-        }
-        .result-box {
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .result-green {
-            background-color: rgba(0, 128, 0, 0.15); /* light green */
-            color: green !important;
-            border: 1px solid green;
-        }
-
-        .result-yellow {
-            background-color: rgba(244, 187, 68, 0.15); /* light yellow */
-            color: #F4BB44 !important;
-            border: 1px solid #F4BB44;
-        }
-
-        .result-red {
-            background-color: rgba(255, 0, 0, 0.15); /* light red */
-            color: red !important;
-            border: 1px solid red;
-        }
-
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# ---- Page Configuration ----
+st.set_page_config(layout="centered")  # Default layout (centered)
 
 # ---- Compteur de visiteurs ----
 if "visitors" not in st.session_state:
@@ -87,39 +32,241 @@ else:
 
 # ---- Horloge ----
 def show_time():
-    while True:
-        current_time = datetime.now().strftime("%H:%M:%S")
-        st.sidebar.markdown(f"*Heure actuelle : {current_time}*")
-        time.sleep(1)
+    current_time = datetime.now().strftime("%H:%M:%S")
+    st.sidebar.markdown(f"**Heure actuelle** : {current_time}")
 
-# ---- Interface principale ----
-st.sidebar.title("Menu")
-st.sidebar.markdown(f"*Nombre de visiteurs :* {st.session_state.visitors}")
-st.sidebar.markdown("*Heure actuelle :*")
-st.sidebar.text(datetime.now().strftime("%H:%M:%S"))  # Affichage statique
+st.sidebar.markdown(f"**Visiteurs**: {st.session_state.visitors}")
+show_time()
 
-menu = ["Accueil", "Analyse de l'Eau","Qualité de l'Eau","Gestion de l'Eau","Technologies et Innovations","Impact Environnemental","Éducation et Sensibilisation","Quiz", "Dropbot"]
-choice = st.sidebar.radio("Navigation", menu)
+# ---- Navigation menu ----
+menu = ["Accueil", "Analyse de l'Eau", "Qualité de l'Eau", "Gestion de l'Eau", "Technologies et Innovations",
+        "Impact Environnemental", "Éducation et Sensibilisation", "Quiz", "Dropbot", "À propos de nous"]
+choice = st.sidebar.radio("**Navigation**", menu)
 
-# ---- Accueil ----
+# Save the current page choice to session_state
+st.session_state.page = choice
+
+# ---- Conditional Wide Mode CSS ----
+if choice in ["Accueil", "À propos de nous"]:
+    st.markdown("""
+        <style>
+        .block-container {
+            max-width: 100% !important;
+            padding-left: 5rem;
+            padding-right: 5rem;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+        <style>
+        .block-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+# ---- Custom App CSS ----
+st.markdown(
+    f"""
+    <style>
+        [data-testid="stAppViewContainer"] {{
+            background-color: white !important;
+        }}
+        [data-testid="stSidebar"] {{
+            background: linear-gradient(to bottom, #001D2F, #015A86, #09759C) !important;
+        }}
+        h1, h2, h3 {{
+            color: #015A86 !important;
+        }}
+        body, p, span {{
+            color: black !important;
+            font-size: 20px !important;
+        }}
+        div[role="radiogroup"] > label {{
+            color: black !important;
+        }}
+        .stButton>button {{
+            background-color: #015A86 !important;
+            color: white !important;
+            font-size: 16px !important;
+            border-radius: 10px !important;
+            border: none !important;
+            padding: 8px !important;
+        }}
+        .stButton>button:hover {{
+            background-color: #77BDD9 !important;
+        }}
+        .header-section {{
+            background-image: url('data:image/png;base64,{background_image_base64}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: white;
+            padding: 60px 5% 60px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }}
+        .header-text {{
+            max-width: 50%;
+        }}
+        .header-text h1 {{
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }}
+        .header-text p {{
+            font-size: 1.2em;
+            line-height: 1.6em;
+            text-align: justify;
+        }}
+        .header-image {{
+            max-width: 40%;
+            text-align: center;
+        }}
+        .header-image img {{
+            width: 100%;
+            border-radius: 12px;
+            content: url('data:image/png;base64,{header_image_base64}');
+        }}
+
+        /* ---- Responsive Design for Mobile ---- */
+        @media (max-width: 768px) {{
+            .header-section {{
+                flex-direction: column !important;
+                text-align: center;
+            }}
+            .header-text, .header-image {{
+                max-width: 100% !important;
+            }}
+            .header-text p {{
+                text-align: justify;
+            }}
+            .header-image img {{
+                width: 100% !important;
+                margin-top: 20px;
+            }}
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown("""
+    <style>
+        section[data-testid="stSidebar"] * {
+            color: white !important;
+        }
+        .css-1v0mbdj span {
+            color: white !important;
+        }
+        .sidebar-text h4 {
+            font-size: 16px;
+            color: white;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
+
+# ---- Page Content ----
 if choice == "Accueil":
-    st.markdown("<h3 style='color:blue;'>Bienvenue dans l'Application</h3>", unsafe_allow_html=True)
-    st.write("""
-         Cette application vous aide à analyser la qualité de l'eau avec des outils interactifs, des quiz et des recommandations.
-    """)
+    st.markdown("""<style>.block-container {padding-top: 0rem;}</style>""", unsafe_allow_html=True)
+
+    st.markdown("""
+        <style>
+            .cta-btn {
+                color: #001D2F;
+                background-color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .cta-btn:hover {
+                background-color: #001D2F;
+                color: #fff;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f"""
+        <style>
+            .header-text {{
+                color: white !important;
+            }}
+            .header-text h1 {{
+                color: white !important;
+            }}
+            .header-text p {{
+                color: white !important;
+            }}
+        </style>
+
+        <div class="header-section">
+            <div class="header-text">
+                <h1>WaterSense</h1>
+                <p> 
+                    L’eau est au cœur de la vie. Mais aujourd’hui, cette ressource vitale est menacée par la pollution, le changement
+                    climatique, la surexploitation et l’inégalité d’accès. Ces défis exigent une prise de conscience collective et une meilleure
+                    compréhension de l’importance de l’eau dans notre quotidien.<br><br>
+                    Bienvenue sur WaterSense, une plateforme éducative et interactive qui t’aide à explorer, apprendre et agir pour une gestion
+                    plus durable de l’eau. Grâce à des outils intelligents comme DropBot, des quiz, des analyses et des contenus pédagogiques, découvre
+                    le monde de l’eau autrement et deviens acteur du changement.
+                </p>
+            </div>
+            <div class="header-image">
+                <img src="data:image/png;base64,{header_image_base64}" alt="Water ripple"/>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+elif choice == "À propos de nous":
+    col1, col2 = st.columns([2, 1])  
+
+    with col1:
+        st.markdown("""
+        <div style="display: flex; align-items: center;">
+            <div style="flex: 1; padding-right: 20px; text-align: justify;">
+                <h1>À propos de nous</h1>
+                <p>
+                    Nous sommes l’équipe <strong>FikrCode</strong> du lycée Ibn Batouta à Larache, un groupe composé de quatre élèves passionnés par les technologies et l’environnement : Amine El Hafidi, Yasmina Belhaj, Siham Idhssain, et Ismail El Karkri. Nous sommes encadrés et supervisés par notre enseignante et mentor, Fatin M'hair, qui nous guide dans ce projet ambitieux.
+                </p>
+                <p>
+                    Notre équipe a été formée autour d’un objectif commun : sensibiliser la communauté à la protection de l’eau, une ressource essentielle et de plus en plus menacée. L’eau, bien qu’elle soit au cœur de la vie, fait face à de nombreux défis tels que la pollution, la surexploitation, le changement climatique et l'inégalité d'accès. Nous souhaitons que chacun comprenne l'importance de préserver cette ressource, non seulement pour nous-mêmes, mais aussi pour les générations futures.
+                </p>
+                <p>
+                    Le projet que nous avons développé est unique en son genre. Nous avons créé un chatbot éducatif simple à utiliser qui répond aux questions du public sur l’eau, en expliquant ses composants, ses propriétés et les menaces qui pèsent sur elle. Ce chatbot est alimenté par des méthodes d’intelligence artificielle simples et accessibles, permettant à tout utilisateur de trouver des informations précises en quelques clics. Ce projet vise à rendre la connaissance de l’eau plus accessible et à encourager l’action collective en faveur de sa gestion durable.
+                </p>
+                <p>
+                    Notre plateforme est entièrement dédiée au grand public. Elle offre un ensemble d'outils interactifs tels que des quiz, des analyses, et des contenus éducatifs. En combinant des informations scientifiques et des solutions concrètes, nous souhaitons inspirer les citoyens, les jeunes en particulier, à adopter des pratiques plus durables pour préserver l’eau et l’environnement en général.
+                </p>
+                <p>
+                    Nous croyons en un monde plus durable, où chaque individu prend conscience de l’importance de l’eau, des risques qui la menacent, et agit pour sa préservation. C’est pourquoi nous nous engageons pleinement dans ce projet, non seulement pour informer, mais aussi pour susciter un réel changement dans la manière dont nous percevons et utilisons l’eau au quotidien. Ensemble, nous pouvons faire la différence et contribuer à la création d’un avenir où l’eau reste une ressource accessible et protégée.
+                </p>
+                <p>
+                    <strong>L’équipe FikrCode</strong>
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.image("eee.png", use_container_width=True)
+
 
 # ---- Analyse de l'eau ----
 elif choice == "Analyse de l'Eau":
     def simulateur_qualite_eau():
         st.title("💧 Simulateur de la qualité de l'eau")
 
-        # Entrées utilisateur avec clés فريدة
         ph = st.slider("📏 Valeur du pH", 0.0, 14.0, 7.0, key="ph_slider")
         turbidite = st.slider("🌫️ Turbidité (en NTU)", 0.0, 10.0, 1.0, key="turbidite_slider")
         nitrates = st.slider("🧪 Nitrates (mg/L)", 0.0, 100.0, 20.0, key="nitrates_slider")
         bacteries = st.radio("🦠 Y a-t-il des bactéries détectées ?", ["Non", "Oui"], key="bacteries_radio")
 
-        # Analyse de la qualité
         messages = []
         score = 100
 
@@ -147,7 +294,6 @@ elif choice == "Analyse de l'Eau":
         else:
             messages.append("✅ Aucune bactérie détectée.")
 
-        # Résultat final
         st.subheader("🔎 Résultat de l'analyse :")
         for m in messages:
             st.write(m)
@@ -159,7 +305,6 @@ elif choice == "Analyse de l'Eau":
         else:
             st.error("🚫 Qualité de l'eau : MAUVAISE")
 
-        # Affichage graphique : pH vs Turbidité
         fig, ax = plt.subplots()
         ax.scatter(ph, turbidite, color='blue', s=150)
         ax.axvline(6.5, color='green', linestyle='--')
@@ -711,7 +856,6 @@ elif choice == "Technologies et Innovations":
     Face aux défis de la pénurie d’eau et de la pollution, plusieurs projets innovants ont été développés pour améliorer l’accès à une eau propre et potable. Voici quelques exemples inspirants de technologies révolutionnaires dans le domaine de l’eau. 💧
     """)
 
-    # 1 - Désalinisation
     st.markdown("<h3>1. Systèmes de Désalinisation Avancés</h3>", unsafe_allow_html=True)
     st.markdown("""
     🔹 **The Solar Dome** *(Arabie Saoudite)*  
@@ -725,7 +869,6 @@ elif choice == "Technologies et Innovations":
     Peut fournir de l’eau potable aux régions côtières souffrant de sécheresse.
     """)
 
-    # 2 - Purification portable
     st.markdown("<h3>2. Machines de Purification d’Eau Portables</h3>", unsafe_allow_html=True)
     st.markdown("""
     🔹 **LifeStraw** *(Suisse)*  
@@ -744,7 +887,6 @@ elif choice == "Technologies et Innovations":
     Peut produire 15 litres d’eau propre par jour, idéale pour les villages isolés.
     """)
 
-    # 3 - Recyclage et collecte
     st.markdown("<h3>3. Systèmes de Collecte et de Recyclage de l’Eau</h3>", unsafe_allow_html=True)
     st.markdown("""
     🔹 **Skywater** *(États-Unis)*  
@@ -763,7 +905,6 @@ elif choice == "Technologies et Innovations":
     Compatible avec les maisons et bâtiments écologiques.
     """)
 
-    # 4 - Drones et robots
     st.markdown("<h3>4. Robots et Drones pour la Surveillance et le Nettoyage des Eaux</h3>", unsafe_allow_html=True)
     st.markdown("""
     🔹 **WasteShark** *(Pays-Bas)*  
@@ -779,7 +920,6 @@ elif choice == "Technologies et Innovations":
     Utilisé pour la surveillance des rivières, lacs et stations d’épuration.
     """)
 
-    # Conclusion + vidéo
     st.markdown("<h2>🌍 Vers un Avenir Plus Durable</h2>", unsafe_allow_html=True)
     st.markdown("""
     Ces innovations montrent que la technologie peut jouer un rôle clé dans la préservation et l’accessibilité de l’eau. Grâce à ces projets, nous pouvons réduire la pollution, économiser les ressources et offrir de l’eau potable aux populations les plus vulnérables. 💙💦
@@ -795,7 +935,6 @@ elif choice == "Impact Environnemental":
     Le changement climatique bouleverse les ressources en eau à travers le monde. Il modifie sa **disponibilité**, **sa qualité** et augmente la fréquence des **catastrophes hydriques**, avec de lourdes conséquences sur la santé, l’agriculture et les écosystèmes.
     """)
 
-    # 1 - Disponibilité de l'eau
     st.markdown("<h3>1. Réduction de la Disponibilité de l’Eau🚱</h3>", unsafe_allow_html=True)
     st.markdown("""
     -**Sécheresses Plus Fréquentes et Intenses**  
@@ -809,7 +948,6 @@ elif choice == "Impact Environnemental":
     📌 *Exemple :* L’**Himalaya** perd ses glaciers, menaçant le Gange, Yangtsé, etc.
     """)
 
-    # 2 - Inondations
     st.markdown("<h3>2. Inondations et Catastrophes Hydriques🌊🌪</h3>", unsafe_allow_html=True)
     st.markdown("""
     -**Précipitations Extrêmes et Crues Subites**  
@@ -823,7 +961,6 @@ elif choice == "Impact Environnemental":
     📌 *Exemple :* Le **Bangladesh** subit une salinisation accrue de ses terres agricoles.
     """)
 
-    # 3 - Qualité de l'eau
     st.markdown("<h3>3. Dégradation de la Qualité de l’Eau🦠☣️</h3>", unsafe_allow_html=True)
     st.markdown("""
     -**Pollution Accrue des Sources d’Eau**  
@@ -837,7 +974,6 @@ elif choice == "Impact Environnemental":
     📌 *Exemple :* Le **barrage du Nil** est source de tension entre l’Éthiopie, le Soudan et l’Égypte.
     """)
 
-    # 4 - Santé et agriculture
     st.markdown("<h3>4. Impacts sur la Santé et l’Agriculture🌾</h3>", unsafe_allow_html=True)
     st.markdown("""
     -**Hausse des Maladies Liées à l’Eau**  
@@ -851,7 +987,6 @@ elif choice == "Impact Environnemental":
     📌 *Exemple :* Le **Sahel** subit une désertification et une chute de productivité.
     """)
 
-    # Conclusion + vidéos
     st.markdown("<h2>🌍Vers des Solutions Durables</h2>", unsafe_allow_html=True)
     st.markdown("""
     ✅ Gestion plus efficace de l’eau (recyclage, irrigation goutte-à-goutte).
@@ -866,7 +1001,6 @@ elif choice == "Impact Environnemental":
 
     """)
 
-    # Vidéos explicatives
     st.video("https://youtu.be/LpSVRqYJP1g?si=swknl0Bp920Qfmbr")
     st.video("https://youtu.be/T4LVXCCmIKA?si=nazGSQJ0OHhVrjBc")
 
@@ -877,7 +1011,6 @@ elif choice == "Impact Environnemental":
     Ces écosystèmes jouent un rôle crucial dans le maintien de l’équilibre écologique, mais sont de plus en plus menacés par la pollution de l’eau.
     """)
 
-    # 1. Biodiversité aquatique
     st.markdown("<h3>1.La Biodiversité Aquatique 🌿🐠</h3>", unsafe_allow_html=True)
 
     st.markdown("<h4>Les Écosystèmes Aquatiques</h4>", unsafe_allow_html=True)
@@ -905,7 +1038,6 @@ elif choice == "Impact Environnemental":
     Ces espèces sont essentielles à l’équilibre des chaînes alimentaires et à la régulation des cycles des nutriments.
     """)
 
-    # 2. Effets de la pollution
     st.markdown("<h3>2.Les Effets de la Pollution de l’Eau sur la Biodiversité Aquatique 🏭💔</h3>", unsafe_allow_html=True)
 
     st.markdown("<h4>Pollution Chimique</h4>", unsafe_allow_html=True)
@@ -940,7 +1072,6 @@ elif choice == "Impact Environnemental":
     📌 *Exemple :* Les **truites**, espèces sensibles, souffrent fortement de cette pollution.
     """)
 
-    # 3. Solutions
     st.markdown("<h3>3.Solutions pour Protéger la Biodiversité Aquatique 🌱💦</h3>", unsafe_allow_html=True)
     
     st.markdown("""
@@ -950,7 +1081,6 @@ elif choice == "Impact Environnemental":
     ✅ **Éducation et Sensibilisation** : Informer le public sur les dangers de la pollution de l’eau.
     """)
 
-    # Conclusion
     st.markdown("<h2>🌍 Un Appel à la Protection de Nos Écosystèmes Aquatiques</h2>", unsafe_allow_html=True)
     
     st.markdown("""
@@ -958,10 +1088,84 @@ elif choice == "Impact Environnemental":
     Agir contre la pollution, c’est préserver notre avenir commun. 💙🐟💧
     """)
 
-    # Vidéos
     st.video("https://youtu.be/bIpmzuuyASY?si=iEi8aMqp7nvSuFUk")
-    st.video("https://youtu.be/bIpmzuuyASY?si=CboPUPvlMVYdgp5S")
+#----"Éducation et Sensibilisation"-----
+elif choice=="Éducation et Sensibilisation":
+    st.markdown("<h1>Éducation et Sensibilisation</h1>", unsafe_allow_html=True)
+    st.markdown("<h2>🌊 Initiatives de Nettoyage des Océans et Réduction des Déchets Plastiques 🌍♻</h2>", unsafe_allow_html=True)
 
+    st.markdown("""
+    Les océans sont submergés par des milliards de tonnes de déchets, principalement plastiques.  
+    Heureusement, plusieurs initiatives mondiales se battent pour restaurer la santé des océans.  
+    Voici quelques-unes des plus remarquables.  
+    """)
+
+    st.markdown("<h3>1. The Ocean Cleanup (Pays-Bas)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Éliminer 90% du plastique flottant dans les océans d'ici 2040.  
+    🔹 *Fonctionnement* : Dispositif flottant avec barrière + filet.  
+    Utilisé dans les gyres océaniques (ex : Great Pacific Garbage Patch).  
+    Le plastique est ensuite recyclé.  
+    📌 Exemple : Des tonnes de plastique collectées dans le Pacifique.
+    """)
+
+    st.markdown("<h3>2. Plastic Bank (International)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Transformer les déchets plastiques en monnaie sociale.  
+    🔹 *Fonctionnement* :  
+    Collecte par des communautés défavorisées, échange contre crédits, énergie, produits.  
+    Création d'une *économie circulaire*.  
+    📌 Exemple : En Haïti, des familles échangent du plastique contre nourriture.
+    """)
+
+    st.markdown("<h3>3. Surfrider Foundation (International)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Protection des océans et plages.  
+    🔹 *Fonctionnement* :  
+    - Nettoyages de plages  
+    - Sensibilisation (Rise Above Plastics)  
+    - Lobbying contre les plastiques à usage unique  
+    📌 Exemple : Événements mondiaux de nettoyage chaque année.
+    """)
+
+    st.markdown("<h3>4. Clean Seas (Programme ONU)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Réduction globale de la pollution plastique.  
+    🔹 *Fonctionnement* :  
+    - Collaboration avec les gouvernements  
+    - Campagnes de sensibilisation  
+    - Encouragement du recyclage et des alternatives durables  
+    📌 Exemple : L'Indonésie, la Belgique, les Philippines agissent grâce à ce programme.
+    """)
+
+    st.markdown("<h3>5. Trash Isles (UK)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Créer un pays fictif dans le Pacifique pour *attirer l’attention* sur la pollution plastique.  
+    🔹 *Fonctionnement* :  
+    - Capitales, passeports symboliques  
+    - Campagnes pour une reconnaissance à l’ONU  
+    📌 Exemple : +200 000 signatures obtenues pour sensibiliser les médias.
+    """)
+
+    st.markdown("<h3>6. Parley for the Oceans (International)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Collaborer avec marques & créateurs pour transformer les plastiques marins en produits utiles.  
+    🔹 *Fonctionnement* :  
+    - Partenariat avec Adidas  
+    - Création de vêtements à partir de plastique océanique recyclé  
+    📌 Exemple : Chaussures Adidas en plastique recyclé.
+    """)
+
+    st.markdown("<h2>🌍 Un Appel à l’Action Collective</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    La pollution plastique est un *défi mondial*.  
+    Ces initiatives montrent qu’il est *possible d’agir*, mais un engagement **collectif** est essentiel.  
+    Chaque geste compte pour *sauver nos océans*. 💙🌊♻
+    """)
+
+    st.video("https://youtu.be/W5atMhdq_gA?si=nYoZTggO86yd-rNp")
+
+    
 # ---- Quiz ----
 elif choice == "Quiz":
     # 📚 Questions à choix multiples (QCM)
@@ -1093,65 +1297,67 @@ elif choice == "Quiz":
         elif page == "Classement des usages":
             sorting_game()
 
-    # Lancement de l’application
     if __name__ == "__main__":
         main()
-# ---- Chatbot ----
-# ---- Chatbot ----
-# ---- Chatbot ----
+
 
 
 # ---- Chatbot ----
 elif choice == "Dropbot":
-
     # === Load and cache model ===
+    def preprocess_input(input_text):
+        return input_text.lower().replace("quels sont", "").strip()
+
     @st.cache_resource
     def load_model():
         return SentenceTransformer('all-MiniLM-L6-v2')
 
-    # === Load QA pairs from JSON ===
     @st.cache_data
     def load_qa_data():
         with open("qa_data.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
-    # === Load model once ===
-    with st.spinner("Chargement du modèle..."):
-        model = load_model()
-
-    # === Load data ===
-    qa_pairs = load_qa_data()
-    questions = list(qa_pairs.keys())
-
-    # === Encode questions (with model as input, to avoid nested caching) ===
     @st.cache_data
-    def encode_questions(model_name, questions):
-        model = SentenceTransformer(model_name)
+    def encode_questions(questions):
+        model = load_model()
         return model.encode(questions)
 
-    question_embeddings = encode_questions('all-MiniLM-L6-v2', questions)
+    def get_best_match_fuzzy(user_input, qa_pairs):
+        best_match = process.extractOne(user_input, list(qa_pairs.keys()))
+        return best_match
+
+    # === Load data ===
+    model = load_model()
+    qa_pairs = load_qa_data()
+    questions = list(qa_pairs.keys())
+    question_embeddings = encode_questions(questions)
 
     # === Initialize memory ===
     if "history" not in st.session_state:
         st.session_state.history = []
 
-    # === UI ===
+    # === Title ===
     st.title("DropBot 💧")
     st.markdown("Pose-moi une question sur l'eau")
 
+    # === Form ===
     with st.form("my_form", clear_on_submit=True):
         user_input = st.text_input("Tape ta question :", key="user_question")
         submitted = st.form_submit_button("Envoyer")
 
+    # === Handle response ===
     if submitted and user_input:
-        user_embedding = model.encode([user_input])
+        user_input_clean = preprocess_input(user_input)
+        user_embedding = model.encode([user_input_clean])
         similarities = cosine_similarity(user_embedding, question_embeddings)
         best_match_idx = np.argmax(similarities)
         confidence = similarities[0][best_match_idx]
         best_answer = qa_pairs[questions[best_match_idx]]
 
-        greeting = np.random.choice(["Bonjour 👋", "Salut !", "Coucou 😊"])
         if confidence < 0.5:
+            fuzzy_match = get_best_match_fuzzy(user_input_clean, qa_pairs)
+            best_answer = qa_pairs[fuzzy_match[0]]
+            greeting = random.choice(["Bonjour 👋", "Salut !", "Coucou 😊"])
             bot_response = f"{greeting} Je ne suis pas totalement sûre, mais cela pourrait t'aider :\n\n**{best_answer}**"
         else:
             bot_response = f"**{best_answer}**"
@@ -1159,8 +1365,17 @@ elif choice == "Dropbot":
         st.session_state.history.append(("Toi", user_input))
         st.session_state.history.append(("Bot", bot_response))
 
+    # === Show chat with avatars ===
     for speaker, message in st.session_state.history:
         if speaker == "Toi":
-            st.markdown(f"**🧑 Toi:** {message}")
+            col1, col2 = st.columns([1, 9])
+            with col1:
+                st.image("https://cdn-icons-png.flaticon.com/512/1077/1077114.png", width=40)  # user avatar
+            with col2:
+                st.markdown(f"**Toi :** {message}")
         else:
-            st.markdown(f"**🤖 Bot:** {message}")
+            col1, col2 = st.columns([1, 9])
+            with col1:
+                st.image("https://cdn-icons-png.flaticon.com/512/3558/3558977.png", width=40)  # bot avatar
+            with col2:
+                st.markdown(f"**DropBot 💧 :** {message}")
