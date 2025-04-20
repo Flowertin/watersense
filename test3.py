@@ -11,7 +11,11 @@ from fuzzywuzzy import process
 from datetime import datetime
 from streamlit_chat import message
 import base64
+# Vider le cache des fonctions avec @st.cache_data
+st.cache_data.clear()
 
+# Vider le cache des fonctions avec @st.cache_resource
+st.cache_resource.clear()
 # ---- Personnalisation CSS ----
 def get_base64_image(image_path):
     """Convert image to base64."""
