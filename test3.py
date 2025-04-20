@@ -1250,7 +1250,8 @@ elif choice == "Dropbot":
     @st.cache_data
     def encode_questions(questions):
         model = load_model()
-        return model.encode(questions, convert_to_numpy=True)
+        embeddings = model.encode(questions)
+        return np.array(embeddings)  # Conversion explicite en numpy
 
     # === Trouver la meilleure correspondance floue ===
     def get_best_match_fuzzy(user_input, qa_pairs):
@@ -1279,7 +1280,7 @@ elif choice == "Dropbot":
     # === Gérer la réponse ===
     if submitted and user_input:
         user_input_clean = preprocess_input(user_input)
-        user_embedding = model.encode([user_input_clean], convert_to_numpy=True)
+        user_embedding = model.encode([user_input_clean])
         similarities = cosine_similarity(user_embedding, question_embeddings)
         best_match_idx = np.argmax(similarities)
         confidence = similarities[0][best_match_idx]
