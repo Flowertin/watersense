@@ -40,7 +40,7 @@ show_time()
 
 # ---- Navigation menu ----
 menu = ["Accueil", "Analyse de l'Eau", "Qualité de l'Eau", "Gestion de l'Eau", "Technologies et Innovations",
-        "Impact Environnemental", "Quiz", "Dropbot", "À propos de nous"]
+        "Impact Environnemental", "Éducation et Sensibilisation", "Quiz", "Dropbot", "À propos de nous"]
 choice = st.sidebar.radio("**Navigation**", menu)
 
 # Save the current page choice to session_state
@@ -1089,7 +1089,81 @@ elif choice == "Impact Environnemental":
     """)
 
     st.video("https://youtu.be/bIpmzuuyASY?si=iEi8aMqp7nvSuFUk")
+#----"Éducation et Sensibilisation"-----
+elif choice=="Éducation et Sensibilisation":
+    st.markdown("<h1>Éducation et Sensibilisation</h1>", unsafe_allow_html=True)
+    st.markdown("<h2>🌊 Initiatives de Nettoyage des Océans et Réduction des Déchets Plastiques 🌍♻</h2>", unsafe_allow_html=True)
 
+    st.markdown("""
+    Les océans sont submergés par des milliards de tonnes de déchets, principalement plastiques.  
+    Heureusement, plusieurs initiatives mondiales se battent pour restaurer la santé des océans.  
+    Voici quelques-unes des plus remarquables.  
+    """)
+
+    st.markdown("<h3>1. The Ocean Cleanup (Pays-Bas)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Éliminer 90% du plastique flottant dans les océans d'ici 2040.  
+    🔹 *Fonctionnement* : Dispositif flottant avec barrière + filet.  
+    Utilisé dans les gyres océaniques (ex : Great Pacific Garbage Patch).  
+    Le plastique est ensuite recyclé.  
+    📌 Exemple : Des tonnes de plastique collectées dans le Pacifique.
+    """)
+
+    st.markdown("<h3>2. Plastic Bank (International)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Transformer les déchets plastiques en monnaie sociale.  
+    🔹 *Fonctionnement* :  
+    Collecte par des communautés défavorisées, échange contre crédits, énergie, produits.  
+    Création d'une *économie circulaire*.  
+    📌 Exemple : En Haïti, des familles échangent du plastique contre nourriture.
+    """)
+
+    st.markdown("<h3>3. Surfrider Foundation (International)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Protection des océans et plages.  
+    🔹 *Fonctionnement* :  
+    - Nettoyages de plages  
+    - Sensibilisation (Rise Above Plastics)  
+    - Lobbying contre les plastiques à usage unique  
+    📌 Exemple : Événements mondiaux de nettoyage chaque année.
+    """)
+
+    st.markdown("<h3>4. Clean Seas (Programme ONU)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Réduction globale de la pollution plastique.  
+    🔹 *Fonctionnement* :  
+    - Collaboration avec les gouvernements  
+    - Campagnes de sensibilisation  
+    - Encouragement du recyclage et des alternatives durables  
+    📌 Exemple : L'Indonésie, la Belgique, les Philippines agissent grâce à ce programme.
+    """)
+
+    st.markdown("<h3>5. Trash Isles (UK)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Créer un pays fictif dans le Pacifique pour *attirer l’attention* sur la pollution plastique.  
+    🔹 *Fonctionnement* :  
+    - Capitales, passeports symboliques  
+    - Campagnes pour une reconnaissance à l’ONU  
+    📌 Exemple : +200 000 signatures obtenues pour sensibiliser les médias.
+    """)
+
+    st.markdown("<h3>6. Parley for the Oceans (International)</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    🔹 *Objectif* : Collaborer avec marques & créateurs pour transformer les plastiques marins en produits utiles.  
+    🔹 *Fonctionnement* :  
+    - Partenariat avec Adidas  
+    - Création de vêtements à partir de plastique océanique recyclé  
+    📌 Exemple : Chaussures Adidas en plastique recyclé.
+    """)
+
+    st.markdown("<h2>🌍 Un Appel à l’Action Collective</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    La pollution plastique est un *défi mondial*.  
+    Ces initiatives montrent qu’il est *possible d’agir*, mais un engagement **collectif** est essentiel.  
+    Chaque geste compte pour *sauver nos océans*. 💙🌊♻
+    """)
+
+    st.video("https://youtu.be/W5atMhdq_gA?si=nYoZTggO86yd-rNp")
 
     
 # ---- Quiz ----
@@ -1228,56 +1302,50 @@ elif choice == "Quiz":
 
 
 
-
 # ---- Chatbot ----
 elif choice == "Dropbot":
-    # === Prétraiter l'entrée de l'utilisateur ===
+    # === Load and cache model ===
     def preprocess_input(input_text):
         return input_text.lower().replace("quels sont", "").strip()
 
-    # === Charger et mettre en cache le modèle ===
     @st.cache_resource
     def load_model():
         return SentenceTransformer('all-MiniLM-L6-v2')
 
-    # === Charger les données QA depuis un fichier JSON ===
     @st.cache_data
     def load_qa_data():
         with open("qa_data.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
-    # === Encoder les questions ===
     @st.cache_data
     def encode_questions(questions):
         model = load_model()
-        embeddings = model.encode(questions)
-        return np.array(embeddings)  # Conversion explicite en numpy
+        return model.encode(questions)
 
-    # === Trouver la meilleure correspondance floue ===
     def get_best_match_fuzzy(user_input, qa_pairs):
         best_match = process.extractOne(user_input, list(qa_pairs.keys()))
         return best_match
 
-    # === Charger les données ===
+    # === Load data ===
     model = load_model()
     qa_pairs = load_qa_data()
     questions = list(qa_pairs.keys())
     question_embeddings = encode_questions(questions)
 
-    # === Initialiser l'historique ===
+    # === Initialize memory ===
     if "history" not in st.session_state:
         st.session_state.history = []
 
-    # === Titre ===
+    # === Title ===
     st.title("DropBot 💧")
     st.markdown("Pose-moi une question sur l'eau")
 
-    # === Formulaire ===
+    # === Form ===
     with st.form("my_form", clear_on_submit=True):
         user_input = st.text_input("Tape ta question :", key="user_question")
         submitted = st.form_submit_button("Envoyer")
 
-    # === Gérer la réponse ===
+    # === Handle response ===
     if submitted and user_input:
         user_input_clean = preprocess_input(user_input)
         user_embedding = model.encode([user_input_clean])
@@ -1287,7 +1355,6 @@ elif choice == "Dropbot":
         best_answer = qa_pairs[questions[best_match_idx]]
 
         if confidence < 0.5:
-            # Si la confiance est faible, essayer la correspondance floue
             fuzzy_match = get_best_match_fuzzy(user_input_clean, qa_pairs)
             best_answer = qa_pairs[fuzzy_match[0]]
             greeting = random.choice(["Bonjour 👋", "Salut !", "Coucou 😊"])
@@ -1298,17 +1365,17 @@ elif choice == "Dropbot":
         st.session_state.history.append(("Toi", user_input))
         st.session_state.history.append(("Bot", bot_response))
 
-    # === Afficher le chat avec les avatars ===
+    # === Show chat with avatars ===
     for speaker, message in st.session_state.history:
         if speaker == "Toi":
             col1, col2 = st.columns([1, 9])
             with col1:
-                st.image("https://cdn-icons-png.flaticon.com/512/1077/1077114.png", width=40)  # avatar utilisateur
+                st.image("https://cdn-icons-png.flaticon.com/512/1077/1077114.png", width=40)  # user avatar
             with col2:
                 st.markdown(f"**Toi :** {message}")
         else:
             col1, col2 = st.columns([1, 9])
             with col1:
-                st.image("https://cdn-icons-png.flaticon.com/512/3558/3558977.png", width=40)  # avatar bot
+                st.image("https://cdn-icons-png.flaticon.com/512/3558/3558977.png", width=40)  # bot avatar
             with col2:
                 st.markdown(f"**DropBot 💧 :** {message}")
