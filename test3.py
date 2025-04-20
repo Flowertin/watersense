@@ -1321,9 +1321,7 @@ elif choice == "Dropbot":
         with open("qa_data.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
-    @st.cache_data
-    def encode_questions(questions):
-        model = load_model()
+    def encode_questions(model, questions):
         return model.encode(questions)
 
     def get_best_match_fuzzy(user_input, qa_pairs):
@@ -1334,11 +1332,13 @@ elif choice == "Dropbot":
     model = load_model()
     qa_pairs = load_qa_data()
     questions = list(qa_pairs.keys())
-    question_embeddings = encode_questions(questions)
 
     # === Initialize memory ===
     if "history" not in st.session_state:
         st.session_state.history = []
+
+    if "question_embeddings" not in st.session_state:
+        st.session_state.question_embeddings = encode_questions(model, questions)
 
     # === Title ===
     st.title("DropBot 💧")
@@ -1353,7 +1353,7 @@ elif choice == "Dropbot":
     if submitted and user_input:
         user_input_clean = preprocess_input(user_input)
         user_embedding = model.encode([user_input_clean])
-        similarities = cosine_similarity(user_embedding, question_embeddings)
+        similarities = cosine_similarity(user_embedding, st.session_state.question_embeddings)
         best_match_idx = np.argmax(similarities)
         confidence = similarities[0][best_match_idx]
         best_answer = qa_pairs[questions[best_match_idx]]
@@ -1383,3 +1383,4 @@ elif choice == "Dropbot":
                 st.image("https://cdn-icons-png.flaticon.com/512/3558/3558977.png", width=40)  # bot avatar
             with col2:
                 st.markdown(f"**DropBot 💧 :** {message}")
+
