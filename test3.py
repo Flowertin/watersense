@@ -40,7 +40,7 @@ show_time()
 
 # ---- Navigation menu ----
 menu = ["Accueil", "Analyse de l'Eau", "Qualité de l'Eau", "Gestion de l'Eau", "Technologies et Innovations",
-        "Impact Environnemental", "Éducation et Sensibilisation", "Quiz", "Dropbot", "À propos de nous"]
+        "Impact Environnemental", "Quiz", "Dropbot", "À propos de nous"]
 choice = st.sidebar.radio("**Navigation**", menu)
 
 # Save the current page choice to session_state
