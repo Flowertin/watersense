@@ -7,3 +7,4 @@ scikit-learn
 fuzzywuzzy
 python-Levenshtein
 streamlit-chat
+torch==2.2.0
