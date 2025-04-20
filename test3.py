@@ -1,4 +1,5 @@
 import streamlit as st
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,11 +12,8 @@ from fuzzywuzzy import process
 from datetime import datetime
 from streamlit_chat import message
 import base64
-# Vider le cache des fonctions avec @st.cache_data
-st.cache_data.clear()
 
-# Vider le cache des fonctions avec @st.cache_resource
-st.cache_resource.clear()
+
 # ---- Personnalisation CSS ----
 def get_base64_image(image_path):
     """Convert image to base64."""
@@ -26,7 +24,11 @@ background_image_base64 = get_base64_image("aaa.jpg")
 header_image_base64 = get_base64_image("WaterSense.png")
 
 # ---- Page Configuration ----
-st.set_page_config(layout="centered")  # Default layout (centered)
+st.set_page_config(
+    page_title="WaterSense",      
+    page_icon="💧",               
+    layout="centered"
+)
 
 # ---- Compteur de visiteurs ----
 if "visitors" not in st.session_state:
@@ -44,7 +46,7 @@ show_time()
 
 # ---- Navigation menu ----
 menu = ["Accueil", "Analyse de l'Eau", "Qualité de l'Eau", "Gestion de l'Eau", "Technologies et Innovations",
-        "Impact Environnemental", "Éducation et Sensibilisation", "Quiz", "Dropbot", "À propos de nous"]
+        "Impact Environnemental", "Quiz", "Dropbot", "À propos de nous"]
 choice = st.sidebar.radio("**Navigation**", menu)
 
 # Save the current page choice to session_state
@@ -1093,83 +1095,7 @@ elif choice == "Impact Environnemental":
     """)
 
     st.video("https://youtu.be/bIpmzuuyASY?si=iEi8aMqp7nvSuFUk")
-#----"Éducation et Sensibilisation"-----
-elif choice=="Éducation et Sensibilisation":
-    st.markdown("<h1>Éducation et Sensibilisation</h1>", unsafe_allow_html=True)
-    st.markdown("<h2>🌊 Initiatives de Nettoyage des Océans et Réduction des Déchets Plastiques 🌍♻</h2>", unsafe_allow_html=True)
-
-    st.markdown("""
-    Les océans sont submergés par des milliards de tonnes de déchets, principalement plastiques.  
-    Heureusement, plusieurs initiatives mondiales se battent pour restaurer la santé des océans.  
-    Voici quelques-unes des plus remarquables.  
-    """)
-
-    st.markdown("<h3>1. The Ocean Cleanup (Pays-Bas)</h3>", unsafe_allow_html=True)
-    st.markdown("""
-    🔹 *Objectif* : Éliminer 90% du plastique flottant dans les océans d'ici 2040.  
-    🔹 *Fonctionnement* : Dispositif flottant avec barrière + filet.  
-    Utilisé dans les gyres océaniques (ex : Great Pacific Garbage Patch).  
-    Le plastique est ensuite recyclé.  
-    📌 Exemple : Des tonnes de plastique collectées dans le Pacifique.
-    """)
-
-    st.markdown("<h3>2. Plastic Bank (International)</h3>", unsafe_allow_html=True)
-    st.markdown("""
-    🔹 *Objectif* : Transformer les déchets plastiques en monnaie sociale.  
-    🔹 *Fonctionnement* :  
-    Collecte par des communautés défavorisées, échange contre crédits, énergie, produits.  
-    Création d'une *économie circulaire*.  
-    📌 Exemple : En Haïti, des familles échangent du plastique contre nourriture.
-    """)
-
-    st.markdown("<h3>3. Surfrider Foundation (International)</h3>", unsafe_allow_html=True)
-    st.markdown("""
-    🔹 *Objectif* : Protection des océans et plages.  
-    🔹 *Fonctionnement* :  
-    - Nettoyages de plages  
-    - Sensibilisation (Rise Above Plastics)  
-    - Lobbying contre les plastiques à usage unique  
-    📌 Exemple : Événements mondiaux de nettoyage chaque année.
-    """)
-
-    st.markdown("<h3>4. Clean Seas (Programme ONU)</h3>", unsafe_allow_html=True)
-    st.markdown("""
-    🔹 *Objectif* : Réduction globale de la pollution plastique.  
-    🔹 *Fonctionnement* :  
-    - Collaboration avec les gouvernements  
-    - Campagnes de sensibilisation  
-    - Encouragement du recyclage et des alternatives durables  
-    📌 Exemple : L'Indonésie, la Belgique, les Philippines agissent grâce à ce programme.
-    """)
-
-    st.markdown("<h3>5. Trash Isles (UK)</h3>", unsafe_allow_html=True)
-    st.markdown("""
-    🔹 *Objectif* : Créer un pays fictif dans le Pacifique pour *attirer l’attention* sur la pollution plastique.  
-    🔹 *Fonctionnement* :  
-    - Capitales, passeports symboliques  
-    - Campagnes pour une reconnaissance à l’ONU  
-    📌 Exemple : +200 000 signatures obtenues pour sensibiliser les médias.
-    """)
-
-    st.markdown("<h3>6. Parley for the Oceans (International)</h3>", unsafe_allow_html=True)
-    st.markdown("""
-    🔹 *Objectif* : Collaborer avec marques & créateurs pour transformer les plastiques marins en produits utiles.  
-    🔹 *Fonctionnement* :  
-    - Partenariat avec Adidas  
-    - Création de vêtements à partir de plastique océanique recyclé  
-    📌 Exemple : Chaussures Adidas en plastique recyclé.
-    """)
-
-    st.markdown("<h2>🌍 Un Appel à l’Action Collective</h2>", unsafe_allow_html=True)
-    st.markdown("""
-    La pollution plastique est un *défi mondial*.  
-    Ces initiatives montrent qu’il est *possible d’agir*, mais un engagement **collectif** est essentiel.  
-    Chaque geste compte pour *sauver nos océans*. 💙🌊♻
-    """)
-
-    st.video("https://youtu.be/W5atMhdq_gA?si=nYoZTggO86yd-rNp")
-
-    
+ 
 # ---- Quiz ----
 elif choice == "Quiz":
     # 📚 Questions à choix multiples (QCM)
@@ -1321,7 +1247,9 @@ elif choice == "Dropbot":
         with open("qa_data.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def encode_questions(model, questions):
+    @st.cache_data
+    def encode_questions(questions):
+        model = load_model()
         return model.encode(questions)
 
     def get_best_match_fuzzy(user_input, qa_pairs):
@@ -1332,13 +1260,11 @@ elif choice == "Dropbot":
     model = load_model()
     qa_pairs = load_qa_data()
     questions = list(qa_pairs.keys())
+    question_embeddings = encode_questions(questions)
 
     # === Initialize memory ===
     if "history" not in st.session_state:
         st.session_state.history = []
-
-    if "question_embeddings" not in st.session_state:
-        st.session_state.question_embeddings = encode_questions(model, questions)
 
     # === Title ===
     st.title("DropBot 💧")
@@ -1353,7 +1279,7 @@ elif choice == "Dropbot":
     if submitted and user_input:
         user_input_clean = preprocess_input(user_input)
         user_embedding = model.encode([user_input_clean])
-        similarities = cosine_similarity(user_embedding, st.session_state.question_embeddings)
+        similarities = cosine_similarity(user_embedding, question_embeddings)
         best_match_idx = np.argmax(similarities)
         confidence = similarities[0][best_match_idx]
         best_answer = qa_pairs[questions[best_match_idx]]
@@ -1383,4 +1309,3 @@ elif choice == "Dropbot":
                 st.image("https://cdn-icons-png.flaticon.com/512/3558/3558977.png", width=40)  # bot avatar
             with col2:
                 st.markdown(f"**DropBot 💧 :** {message}")
-
