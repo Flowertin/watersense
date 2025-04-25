@@ -173,6 +173,27 @@ st.markdown("""
             font-size: 16px;
             color: white;
         }
+            @media (max-width: 768px) {
+        .header-text h1 {
+            font-size: 2em !important;
+        }
+        .header-text p {
+            font-size: 0.95em !important;
+        }
+        h1, h2, h3 {
+            font-size: 1.2em !important;
+        }
+        body, p, span {
+            font-size: 0.95em !important;
+        }
+        div[role="radiogroup"] > label {
+            font-size: 0.95em !important;
+        }
+        .stButton>button {
+            font-size: 0.95em !important;
+            padding: 6px !important;
+        }
+    }
     </style>
 """, unsafe_allow_html=True)
 
