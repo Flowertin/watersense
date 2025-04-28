@@ -1,4 +1,3 @@
-
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -1733,9 +1732,9 @@ elif choice == translate("Dropbot", "دروب بوت"):
             # عرض الإجابة مع التطابق جزئيًا
             if match:
                 partial_answer = qa_pairs[match]
-                bot_response = f"**إجابة تقريبية :** {partial_answer} (تطابق: {match_score}%)"
+                bot_response = f"{partial_answer} (تطابق: {match_score}%)"
             else:
-                bot_response = "**لم أتمكن من إيجاد إجابة دقيقة.**"
+                bot_response = translate("Je n'ai pas pu trouver une réponse précise.","**لم أتمكن من إيجاد إجابة دقيقة.**")
             st.session_state.history.append(("Bot", bot_response))
 
     # === إذا البوت ينتظر إجابة من المستخدم ===
