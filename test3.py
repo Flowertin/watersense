@@ -63,9 +63,9 @@ else:
 # ---- Sidebar - Visitors and Time ----
 def show_time():
     current_time = datetime.now().strftime("%H:%M:%S")
-    st.sidebar.markdown(f"**{translate('Current Time', 'الوقت الحالي')}**: {current_time}")
+    st.sidebar.markdown(f"**{translate('Heure actuelle', 'الوقت الحالي')}**: {current_time}")
 
-st.sidebar.markdown(f"**{translate('Visitors', 'الزوار')}**: {st.session_state.visitors}")
+st.sidebar.markdown(f"**{translate('Visiteurs', 'الزوار')}**: {st.session_state.visitors}")
 show_time()
 
 # ---- Navigation Menu ----
@@ -390,9 +390,6 @@ elif choice in ["À propos de nous", "معلومات عنا"]:
         st.image("eee.png", use_container_width=True)
 
 
-# ---- Analyse de l'eau ----
-
-# ---- Analyse de l'eau ----
 
 # ---- Analyse de l'eau ----
 
@@ -1630,18 +1627,14 @@ elif choice== translate("Quiz","اختبار"):
     def main():
         st.sidebar.title(translate("💧 Quiz : Cycle et usages de l’eau", "💧 اختبار: دورة المياه واستخداماتها"))
 
-        # الصفحات باللغتين
         page_fr = ["QCM", "Vrai ou Faux", "Questions ouvertes", "Classement des usages"]
         page_ar = ["أسئلة متعددة الاختيارات", "صح أم خطأ", "أسئلة مفتوحة", "ترتيب الاستعمالات"]
 
-        # نحدد القائمة حسب اللغة
         menu = page_ar if st.session_state.lang == "العربية" else page_fr
 
-        # نعرض القائمة الصحيحة
         choice = st.sidebar.radio(translate("Choisissez un jeu :", "اختر لعبة :"), menu)
         st.session_state.page = choice
 
-        # الآن نتحقق من الاختيار حسب اللغة
         if st.session_state.lang == "العربية":
             if choice == "أسئلة متعددة الاختيارات":
                 multiple_choice_game()
@@ -1665,7 +1658,6 @@ elif choice== translate("Quiz","اختبار"):
 
 
 
-# ---- Chatbot ----
 elif choice == translate("Dropbot", "دروب بوت"):
 
     @st.cache_data
@@ -1680,12 +1672,11 @@ elif choice == translate("Dropbot", "دروب بوت"):
         with open("qa_data.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-    # === وظائف المساعدة ===
 
     def find_best_match(user_input, qa_pairs):
         best_match = process.extractOne(user_input, qa_pairs.keys())
         if best_match and best_match[1] > 80:
-            return best_match[0], best_match[1]  # إرجاع السؤال الأكثر توافقًا والنسبة المئوية للتطابق
+            return best_match[0], best_match[1]  
         return None, 0
 
     # === تحميل البيانات ===
@@ -1703,24 +1694,21 @@ elif choice == translate("Dropbot", "دروب بوت"):
     if "pending_question" not in st.session_state:
         st.session_state.pending_question = ""
 
-    # === الواجهة ===
 
     st.title(translate("DropBot 💧", "دروب بوت 💧"))
     st.markdown(translate("Pose-moi une question sur l'eau", "اطرح عليّ سؤالاً حول الماء"))
 
-    # === نموذج الإدخال ===
 
     with st.form("question_form", clear_on_submit=True):
         user_input = st.text_input(translate("Tape ta question :", "اكتب سؤالك :"), key="user_question")
         submitted = st.form_submit_button(translate("Envoyer", "إرسال"))
 
-    # === معالجة السؤال ===
 
     if submitted and user_input:
         match, match_score = find_best_match(user_input, qa_pairs)
-        st.session_state.history.append(("Toi", user_input))  # سجل السؤال أولاً
+        st.session_state.history.append(("Toi", user_input))  
         
-        if match and match_score == 100:
+        if match and match_score >=89:
             best_answer = qa_pairs[match]
             bot_response = f"**{best_answer}**"
             st.session_state.history.append(("Bot", bot_response))
@@ -1729,15 +1717,13 @@ elif choice == translate("Dropbot", "دروب بوت"):
         else:
             st.session_state.awaiting_answer = True
             st.session_state.pending_question = user_input
-            # عرض الإجابة مع التطابق جزئيًا
             if match:
                 partial_answer = qa_pairs[match]
-                bot_response = f"{partial_answer} (تطابق: {match_score}%)"
+                bot_response = f"{partial_answer} ({translate('Correspondance','تطابق')}: {match_score}%)"
             else:
                 bot_response = translate("Je n'ai pas pu trouver une réponse précise.","**لم أتمكن من إيجاد إجابة دقيقة.**")
             st.session_state.history.append(("Bot", bot_response))
 
-    # === إذا البوت ينتظر إجابة من المستخدم ===
 
     if st.session_state.awaiting_answer:
         st.info(translate("Je n'ai pas trouvé de réponse exacte 😔. Peux-tu m'apprendre la bonne réponse ?", 
@@ -1747,7 +1733,7 @@ elif choice == translate("Dropbot", "دروب بوت"):
             save_submitted = st.form_submit_button(translate("Sauvegarder la réponse", "حفظ الإجابة"))
 
         if save_submitted and new_answer:
-            qa_pairs = load_qa_data()  # إعادة التحميل لضمان التحديث
+            qa_pairs = load_qa_data()  
             qa_pairs[st.session_state.pending_question] = new_answer
             save_qa_data(qa_pairs)
             
@@ -1759,7 +1745,6 @@ elif choice == translate("Dropbot", "دروب بوت"):
             st.success(translate("Merci ! J'ai appris une nouvelle réponse. Recharge la page pour continuer.", 
                                  "شكراً! لقد تعلمت إجابة جديدة. يرجى إعادة تحميل الصفحة للمتابعة."))
 
-    # === عرض المحادثة مع الأفتارات ===
 
     for speaker, message in st.session_state.history:
         col1, col2 = st.columns([1, 9])
